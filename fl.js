@@ -60,13 +60,17 @@ d3.json("data.json").then(data => {
       .attr("cx", d => d.x)
       .attr("cy", d => d.y)
 
-      simulation.alpha().restart();
+    // console.log(nodes.data());
+
+    simulation.force('x').initialize(nodes.data())
+    simulation.force('y').initialize(nodes.data())
+    simulation.alpha(1).restart();
   }
 
   
   const simulation = d3.forceSimulation(data.nodes)
   .force('link', d3.forceLink().links(data.links).id(d => d.id))
-  // .force('link', d3.forceLink().links(data.links).id(d => d.id).distance(50))
+  // .force('link', d3.forceLink().links(data.links).id(d => d.id).distance(100))
   .force('charge', d3.forceManyBody())
   // .force('charge', d3.forceManyBody().strength(5))
   .force('collision', d3.forceCollide().radius(d => d.radius))
