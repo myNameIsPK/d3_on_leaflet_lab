@@ -1,0 +1,70 @@
+{
+  "nodes": [
+    {
+      "id": 1,
+      "type": "parent",
+      "lat": 51.506532,
+      "lon": -0.074624,
+      "img": "https://cdn0.iconfinder.com/data/icons/flat-round-system/512/android-128.png"
+    },
+    {
+      "id": 2,
+      "type": "parent",
+      "lat": 51.504452,
+      "lon": -0.076028,
+      "img": "https://cdn1.iconfinder.com/data/icons/social-media-set/24/Reverbnation-128.png"
+    },
+    {
+      "id": 3,
+      "type": "parent",
+      "lat": 51.505548,
+      "lon": -0.075316,
+      "img": "https://cdn1.iconfinder.com/data/icons/user-pictures/100/male3-128.png"
+    },
+    {
+      "id": 4,
+      "type": "parent",
+      "lat": 51.508109,
+      "lon": -0.076061,
+      "img": "https://cdn0.iconfinder.com/data/icons/flat-round-system/512/android-128.png"
+    },
+    {
+      "id": 5,
+      "type": "parent",
+      "lat": 51.506019,
+      "lon": -0.073639,
+      "img": "https://cdn0.iconfinder.com/data/icons/flat-round-system/512/android-128.png"
+    },
+    {
+      "id": 6,
+      "type": "child",
+      "lat": 51.504452,
+      "lon": -0.076028,
+      "img": "https://cdn1.iconfinder.com/data/icons/user-pictures/100/male3-128.png"
+    },
+    {
+      "id": 7,
+      "type": "child",
+      "lat": 51.504452,
+      "lon": -0.076028,
+      "img": "https://cdn1.iconfinder.com/data/icons/user-pictures/100/male3-128.png"
+    },
+    {
+      "id": 8,
+      "type": "child",
+      "lat": 51.504452,
+      "lon": -0.076028,
+      "img": "https://cdn1.iconfinder.com/data/icons/user-pictures/100/male3-128.png"
+    }
+  ],
+  "links": [
+    { "id": 1, "from": 1, "to": 2 },
+    { "id": 2, "from": 2, "to": 3 },
+    { "id": 3, "from": 3, "to": 4 },
+    { "id": 4, "from": 4, "to": 5 },
+    { "id": 5, "from": 5, "to": 1 },
+    { "id": 6, "from": 2, "to": 6 },
+    { "id": 7, "from": 2, "to": 7 },
+    { "id": 8, "from": 2, "to": 8 }
+  ]
+}
