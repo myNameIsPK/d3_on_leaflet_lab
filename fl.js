@@ -8,7 +8,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 let svgLayer = L.svg();
 svgLayer.addTo(map)
 
-let radius = 10;
+let radius = 15;
 
 d3.json("data.json").then(data => {
 
@@ -25,6 +25,7 @@ d3.json("data.json").then(data => {
 
   const svg = d3.select("#map").select("svg")
   const g = svg.select("g")
+  const defs = svg.append("svg:defs");
 
   const lines = g .selectAll("line")
     .data(data.links)
@@ -37,8 +38,24 @@ d3.json("data.json").then(data => {
   const nodes = g.selectAll("circle")
     .data(data.nodes)
     .join("circle")
+    .attr("id", d => `node-${d.id}`)
     .attr("r", radius)
-    .attr("fill", "blue")
+    // .attr("fill", "blue")
+    .attr("fill", d => {
+      let imgSize = d.radius*2
+      defs
+        .append("svg:pattern")
+        .attr("id", `node-img-id${d.id}`)
+        .attr("width", imgSize)
+        .attr("height", imgSize)
+        .append("svg:image")
+        .attr("xlink:href", d.img)
+        .attr("width", imgSize)
+        .attr("height", imgSize)
+        .attr("x", 0)
+        .attr("y", 0)
+      return `url(#node-img-id${d.id})`
+    })
   
   const drawAndUpdate = () => {
 
@@ -60,8 +77,7 @@ d3.json("data.json").then(data => {
       .attr("cx", d => d.x)
       .attr("cy", d => d.y)
 
-    // console.log(nodes.data());
-
+    //re force center of all nodes 
     simulation.force('x').initialize(nodes.data())
     simulation.force('y').initialize(nodes.data())
     simulation.alpha(1).restart();
@@ -70,10 +86,10 @@ d3.json("data.json").then(data => {
   
   const simulation = d3.forceSimulation(data.nodes)
   .force('link', d3.forceLink().links(data.links).id(d => d.id))
-  // .force('link', d3.forceLink().links(data.links).id(d => d.id).distance(100))
+  // .force('link', d3.forceLink().links(data.links).id(d => d.id).distance(50))
   .force('charge', d3.forceManyBody())
-  // .force('charge', d3.forceManyBody().strength(5))
-  .force('collision', d3.forceCollide().radius(d => d.radius))
+  // .force('charge', d3.forceManyBody().strength(-200))
+  .force('collision', d3.forceCollide().radius(d => d.radius*1.5))
   .force('x', d3.forceX().x(d => d.layerPoint.x))
   .force('y', d3.forceY().y(d => d.layerPoint.y))
   // .force('x', d3.forceX().x(d => d.x).strength(0.06))
