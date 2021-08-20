@@ -40,6 +40,7 @@ d3.json("data.json").then(data => {
     .join("circle")
     .attr("id", d => `node-${d.id}`)
     .attr("r", radius)
+    .attr("stroke", "red")
     // .attr("fill", "blue")
     .attr("fill", d => {
       let imgSize = d.radius*2
@@ -78,9 +79,9 @@ d3.json("data.json").then(data => {
       .attr("cy", d => d.y)
 
     //re force center of all nodes 
-    simulation.force('x').initialize(nodes.data())
-    simulation.force('y').initialize(nodes.data())
-    simulation.alpha(1).restart();
+    // simulation.force('x').initialize(nodes.data())
+    // simulation.force('y').initialize(nodes.data())
+    // simulation.alpha(1).restart();
   }
 
   
@@ -96,6 +97,12 @@ d3.json("data.json").then(data => {
   // .force('y', d3.forceY().y(d => d.y).strength(0.04))
   .on('tick', () => {
     drawAndUpdate()
+  })
+  
+  map.on("zoomend", () => {
+    simulation.force('x').initialize(nodes.data())
+    simulation.force('y').initialize(nodes.data())
+    simulation.alpha(1).restart()
   })
 
 })
