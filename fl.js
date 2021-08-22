@@ -1,11 +1,11 @@
-let map = L.map("map").setView([51.505548, -0.075316], 16);
+let map = L.map("map").setView([15, 103], 10);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution:
     'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 }).addTo(map);
 
-let svgLayer = L.svg();
+let svgLayer = L.svg({clickable:true});
 svgLayer.addTo(map)
 
 let radius = 15;
@@ -23,11 +23,12 @@ d3.json("data.json").then(data => {
     d.target = d.to;
   });
 
-  const svg = d3.select("#map").select("svg")
+  // set d3 to use svg layer in leaflet and config it to enable interaction with svg element.
+  const svg = d3.select("#map").select("svg").attr("pointer-events", "auto")
   const g = svg.select("g")
   const defs = svg.append("svg:defs");
 
-  const lines = g .selectAll("line")
+  const links = g .selectAll("line")
     .data(data.links)
     .join("line")
     .attr("stroke", "red")
@@ -57,10 +58,27 @@ d3.json("data.json").then(data => {
         .attr("y", 0)
       return `url(#node-img-id${d.id})`
     })
-  
+    .on("mouseover", function() { 
+      d3.select(this).transition() 
+        .duration("150")
+        .attr("stroke", "blue")
+        .attr('r', radius*2)
+    })
+    .on("mouseout", function() {
+      d3.select(this).transition()
+        .duration('150')
+        .attr("stroke", "red")
+        .attr("r", radius)
+    })
+    .on("click", function() {
+      links.attr("stroke", d => {
+        return `node-${d.source.id}` == this.id || `node-${d.target.id}` == this.id ? "blue" : "red" 
+      })
+    })
+
   const drawAndUpdate = () => {
 
-    lines
+    links
       .attr("x1", (d) => d.source.x)
       .attr("y1", (d) => d.source.y)
       .attr("x2", (d) => d.target.x)
@@ -78,7 +96,6 @@ d3.json("data.json").then(data => {
       .attr("cx", d => d.x)
       .attr("cy", d => d.y)
 
-    //re force center of all nodes 
     // simulation.force('x').initialize(nodes.data())
     // simulation.force('y').initialize(nodes.data())
     // simulation.alpha(1).restart();
@@ -99,6 +116,7 @@ d3.json("data.json").then(data => {
     drawAndUpdate()
   })
   
+  // update force center position of all child nodes when the zooming end
   map.on("zoomend", () => {
     simulation.force('x').initialize(nodes.data())
     simulation.force('y').initialize(nodes.data())
