@@ -12,7 +12,9 @@ let radius = 15;
 
 d3.json("data.json").then(data => {
 
-  data.nodes.forEach((d, i) => {
+  let parentList = []
+  data.nodes.forEach((d) => {
+    if (d.type == "parent") parentList.push(d.id)
     d.latLong = new L.LatLng(d.lat, d.lon);
     d.layerPoint = map.latLngToLayerPoint(d.latLong)
     d.radius = radius
@@ -21,6 +23,8 @@ d3.json("data.json").then(data => {
   data.links.forEach((d) => {
     d.source = d.from;
     d.target = d.to;
+    d.isParentToParent = (parentList.includes(d.target) && parentList.includes(d.source))
+    d.stroke = d.isParentToParent ? "green" : "red"
   });
 
   // set d3 to use svg layer in leaflet and config it to enable interaction with svg element.
@@ -28,10 +32,10 @@ d3.json("data.json").then(data => {
   const g = svg.select("g")
   const defs = svg.append("svg:defs");
 
-  const links = g .selectAll("line")
+  const links = g.selectAll("line")
     .data(data.links)
     .join("line")
-    .attr("stroke", "red")
+    .attr("stroke", d => d.stroke)
     .attr("stroke-opacity", 0.3)
     .attr("stroke-width", 5)
 
@@ -72,7 +76,7 @@ d3.json("data.json").then(data => {
     })
     .on("click", function() {
       links.attr("stroke", d => {
-        return `node-${d.source.id}` == this.id || `node-${d.target.id}` == this.id ? "blue" : "red" 
+        return `node-${d.source.id}` == this.id || `node-${d.target.id}` == this.id ? "blue" : d.stroke 
       })
     })
 
@@ -101,26 +105,44 @@ d3.json("data.json").then(data => {
     // simulation.alpha(1).restart();
   }
 
-  
+  // because child link follow parent link we must separate them. 
   const simulation = d3.forceSimulation(data.nodes)
-  .force('link', d3.forceLink().links(data.links).id(d => d.id))
+  .force('link', d3.forceLink().links(data.links.filter(d => d.isParentToParent)).id(d => d.id))
+  .force('link', d3.forceLink().links(data.links.filter(d => !d.isParentToParent)).id(d => d.id))
+  // .force('link', d3.forceLink().links(data.links).id(d => d.id))
   // .force('link', d3.forceLink().links(data.links).id(d => d.id).distance(50))
-  .force('charge', d3.forceManyBody())
-  // .force('charge', d3.forceManyBody().strength(-200))
+  // .force('charge', d3.forceManyBody())
+  .force('charge', d3.forceManyBody().strength(-300))
   .force('collision', d3.forceCollide().radius(d => d.radius*1.5))
   .force('x', d3.forceX().x(d => d.layerPoint.x))
   .force('y', d3.forceY().y(d => d.layerPoint.y))
-  // .force('x', d3.forceX().x(d => d.x).strength(0.06))
-  // .force('y', d3.forceY().y(d => d.y).strength(0.04))
+  // .force('x', d3.forceX().x(d => d.layerPoint.x).strength(0.06))
+  // .force('y', d3.forceY().y(d => d.layerPoint.y).strength(0.04))
   .on('tick', () => {
     drawAndUpdate()
   })
-  
+
+  map.on("zoomstart", () => {
+    nodes.each((d) => { d.prevLatLong = map.layerPointToLatLng(d.layerPoint) })
+  })
+
+  // update child to change latLng position to follow parent position for smooth redraw
+  const updateChild = () => {
+    nodes.each((d) => {
+      d.layerPoint = map.latLngToLayerPoint(d.prevLatLong)
+      if (d.type === "child"){
+        d.x = d.layerPoint.x
+        d.y = d.layerPoint.y
+      }
+    })
+  }
+
   // update force center position of all child nodes when the zooming end
   map.on("zoomend", () => {
     simulation.force('x').initialize(nodes.data())
     simulation.force('y').initialize(nodes.data())
-    simulation.alpha(1).restart()
+    simulation.alpha(0.3).restart()
+    updateChild()
   })
 
 })
