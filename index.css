@@ -5,3 +5,15 @@
   /* height: 600;
   width: 900; */
 }
+
+.tooltip {
+    background: #fff;
+    box-shadow: 0 0 12px rgba(0,0,0,.33);
+    font-family: "Segoe UI";
+    line-height: normal;
+    padding: 15px;
+    width: 250px;
+    position: absolute;
+    border-radius: 5px;
+    display: none;
+}

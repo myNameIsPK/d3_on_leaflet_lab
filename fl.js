@@ -74,11 +74,38 @@ d3.json("data.json").then(data => {
         .attr("stroke", "red")
         .attr("r", radius)
     })
-    .on("click", function() {
+
+    let div = d3.select(map.getPanes().tooltipPane)
+      .append("div")
+      .attr("class", "tooltip")
+
+    nodes.on("click", function(event, d) {
+      const [x, y] = d3.pointer(event);
+
+      let popup = (d) => {
+        return `<strong>Hello world!, ID:${d.id}</strong><br />I am a popup.`
+      }
+
+      div
+        .html(popup(d))
+        .transition()
+        .duration(200)
+        .style("display", "block")
+        .style("visibility", "visible")
+        .style("opacity", 1)
+        .style("left", x - 30 + "px")
+        .style("top", y + 30 + "px");
+      
+      // highlight neighbor
       links.attr("stroke", d => {
         return `node-${d.source.id}` == this.id || `node-${d.target.id}` == this.id ? "blue" : d.stroke 
       })
     })
+
+    map.on("click", function (e) {
+      div.style("opacity", 0);
+      div.style("visibility", "hidden");
+    });
 
   const drawAndUpdate = () => {
 
